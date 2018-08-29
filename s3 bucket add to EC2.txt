@@ -1,0 +1,11 @@
+https://www.youtube.com/watch?v=BEv-LDRWfhE
+
+
+
+
+http://sharadchhetri.com/2013/03/08/how-to-mount-s3-bucket-in-linux-ec2-instance/
+
+
+
+
+https://cloudkul.com/blog/mounting-s3-bucket-linux-ec2-instance/
