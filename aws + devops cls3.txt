@@ -1,8 +1,0 @@
-https://cloudacademy.com/blog/aws-ami-hvm-vs-pv-paravirtual-amazon/
-
-https://aws.amazon.com/ec2/instance-types/
-
-
-
-
-https://www.youtube.com/watch?v=vNic2xziwlY
