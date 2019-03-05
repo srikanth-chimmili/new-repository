@@ -1,0 +1,120 @@
+---
+- hosts: webserver
+  become: yes
+  tasks:
+   - name: install apache2 pkg
+     apt:
+      name: apache2
+      state: latest
+
+
+[webserver]
+172.31.92.143 ansible_user=ubuntu ansible_ssh_private_key_file=/root/awskey.pem
+172.31.40.167 ansible_user=ubuntu ansible_ssh_private_key_file=/root/awskey.pem
+
+
+################################## #############################################################################
+
+1. install python
+1. install pip
+2. install AWSCLI
+3. install python-boto3 -#apt-get install python-boto3
+
+4. configure aws cli---> #aws configure
+                          give access key and passwd key
+
+5. now create play book and run ansible ?
+
+#####################################################################################
+
+#vim main.yml
+
+---
+- hosts: localhost
+  tasks:
+   - name: Launch the new EC2 Instance
+     ec2:
+       key_name: awskey
+       instance_type: t2.micro
+       image: ami-aa2ea6d0
+       region: us-east-1
+       wait: yes
+       group: devops_SG
+       count: 1
+       vpc_subnet_id: subnet-a0a44a8f
+       assign_public_ip: yes
+
+
+##############################################################################################
+#vim main.yml ---> create SG also at the time of launching ec2 instance.
+---
+  - name: Provision an EC2 Instance
+    hosts: localhost
+    connection: localhost
+    gather_facts: False
+    tags: provisioning
+    # Necessary Variables for creating/provisioning the EC2 Instance
+    vars:
+      instance_type: t2.micro
+      security_group: webserverSG # Change the security group name here
+      image: ami-aa2ea6d0 # This is an AMI i created myself
+      keypair: awskey # This is one of my keys that i already have in AWS
+      region: us-east-1 # Change the Region
+      count: 1
+
+    # Task that will be used to Launch/Create an EC2 Instance
+    tasks:
+
+      - name: Create a security group
+        local_action:
+          module: ec2_group
+          name: "{{ security_group }}"
+          description: Security Group for webserver Servers
+          region: "{{ region }}"
+          rules:
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 0.0.0.0/0
+            - proto: tcp
+              from_port: 80
+              to_port: 80
+              cidr_ip: 0.0.0.0/0
+            - proto: tcp
+              from_port: 443
+              to_port: 443
+              cidr_ip: 0.0.0.0/0
+          rules_egress:
+            - proto: all
+              cidr_ip: 0.0.0.0/0
+        register: basic_firewall
+
+      - name: Launch the new EC2 Instance
+        local_action: ec2
+                      group={{ security_group }}
+                      instance_type={{ instance_type}}
+                      image={{ image }}
+                      wait=true
+                      region={{ region }}
+                      keypair={{ keypair }}
+                      count={{count}}
+        register: ec2
+
+
+###################################################################
+
+Ref below link to creating tag for instance :
+
+http://www.tothenew.com/blog/launching-and-configuring-an-aws-ec2-instance-using-ansible/
+
+Ref to link launch instance :
+
+https://www.agix.com.au/build-an-ec2-using-ansible-step-by-step/
+
+Ref to creATE users:
+
+https://www.agix.com.au/use-ansible-to-add-users-and-their-ssh-public-keys-on-multiple-linux-servers/
+
+
+
+
